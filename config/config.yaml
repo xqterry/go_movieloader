@@ -1,0 +1,12 @@
+movies:
+  - name: movie1
+    file: /dataset/movie_1.mkv
+    ss: 00:01:00
+  - name: movie2
+    file: /dataset/movie_2.mkv
+    ss: 00:03:00
+  - name: movie3
+    file: /dataset/movie_3.mp4
+    ss: 00:02:00
+params: "-pix_fmt rgb24 -c:v rawvideo"
+crop: 896

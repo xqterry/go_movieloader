@@ -195,6 +195,12 @@ func (svc *ZMQService) Start() {
 	err = zmq.Proxy(router, backend, nil)
 	log.Fatalln("Proxy interrupted:", err)
 
+	// WTF!
+	// this program will send very large amount ffmpeg data and high memory usage
+	// so GC will be triggered and it will purge router/backend.
+	// the following unused code just tell GC to keep them.
+	router.Close()
+	backend.Close()
 }
 
 func (svc *ZMQService) server_worker(wid int) {
@@ -281,7 +287,7 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 	nBytes, nChunks := int64(0), int64(0)
 	//r := bufio.NewReader(stdout)
 	r := stdout
-	buf := make([]byte, 0, 4*1024)
+	buf := make([]byte, 0, 512*1024)
 
 	_ = cmd.Start()
 
@@ -311,14 +317,20 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 
 		//log.Println("send message", item.cid, reflect.TypeOf(item.cid), len(buf), reflect.TypeOf(buf))
 
-		item.worker.SendMessage(item.cid, buf)
-
-		//log.Println("copy end ", len(buf))
-		nBytes += int64(len(buf))
-		// process buf
-		if err != nil && err != io.EOF {
-			log.Fatal(err)
+		needSend := n
+		nSentTotal := 0
+		for nSentTotal < needSend {
+			nSent, err := item.worker.SendMessage(item.cid, buf[nSentTotal:])
+			log.Println("Chunk", nChunks, "Sent piece size ", nSent- len(item.cid), " target ", needSend)
+			//log.Println("copy end ", len(buf))
+			nSentTotal += nSent - len(item.cid)
+			// process buf
+			if err != nil && err != io.EOF {
+				log.Println(err)
+			}
 		}
+
+		nBytes += int64(needSend)
 	}
 
 	log.Println("Send bytes N ", nBytes)
@@ -377,7 +389,7 @@ func (svc *ZMQService) KCPStart() {
 		conn.SetWriteDelay(true)
 		// conn.SetNoDelay(config.NoDelay, config.Interval, config.Resend, config.NoCongestion)
 		// conn.SetMtu(config.MTU)
-		conn.SetWindowSize(1000, 1000)
+		conn.SetWindowSize(0, 0)
 		// conn.SetACKNoDelay(config.AckNodelay)
 
 		go func(conn *kcp.UDPSession) {

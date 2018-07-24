@@ -9,6 +9,7 @@ import (
 	"log"
 	"runtime"
 	"gopkg.in/yaml.v2"
+	"reflect"
 )
 
 func set_id(soc *zmq.Socket) string {
@@ -56,17 +57,25 @@ func client_task() {
 		}
 	}()
 
+	sz := 0
 	for {
 		time.Sleep(10 * time.Millisecond)
 		mu.Lock()
 		msg, err := client.RecvMessage(zmq.DONTWAIT)
+		//msg, err := client.RecvMessage(0)
 		if err == nil {
 			id, _ := client.GetIdentity()
 			fmt.Println(msg, id, "My ID", my_id)
 
-			state = 0
+			sz += len(msg[0])
+			log.Println("recv message", reflect.TypeOf(msg[0]), len(msg[0]))
+			//state = 0
+
+			//break
 		}
 		mu.Unlock()
+
+		log.Println("recv size ", sz)
 	}
 }
 
@@ -75,8 +84,8 @@ func main() {
 
 	ch := make(chan int)
 
-	go client_task()
-	go client_task()
+	//go client_task()
+	//go client_task()
 	go client_task()
 
 	log.Println("waiting for clients")

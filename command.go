@@ -4,7 +4,10 @@ type SendCommand struct {
 	Code int `yaml:"code"`
 	Names []string	`yaml:"names"`
 	Index int		`yaml:"index"`
-
+	Count int		`yaml:"count"`
+	Width int		`yaml:"width"`
+	Height int		`yaml:"height"`
+	Movie string		`yaml:"movie"`
 }
 
 type RecvCommand struct {

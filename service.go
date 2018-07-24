@@ -15,6 +15,7 @@ import (
 	"gopkg.in/xtaci/kcp-go.v3"
 	"github.com/davecgh/go-spew/spew"
 	"runtime"
+	"os/exec"
 )
 
 const (
@@ -123,6 +124,7 @@ type WorkItem struct {
 	cmd *SendCommand
 
 	workerId int
+	worker *zmq.Socket
 }
 
 
@@ -218,7 +220,10 @@ func (svc *ZMQService) server_worker(wid int) {
 		msg, _ := worker.RecvMessage(0)
 		identity, content := pop(msg)
 
-		log.Println("got message", wid, reflect.TypeOf(content), len(content))
+		log.Println("got message", wid, reflect.TypeOf(content), len(content),
+			reflect.TypeOf(identity), len(identity),
+			"msg size", len(msg))
+
 		////  Send 0..4 replies back
 		//replies := 1 //rand.Intn(5)
 		//for reply := 0; reply < replies; reply++ {
@@ -241,6 +246,7 @@ func (svc *ZMQService) server_worker(wid int) {
 		item := &WorkItem{
 			cid: identity[0],
 			cmd: cmd,
+			worker: worker,
 		}
 
 		svc.queue <- item
@@ -248,7 +254,74 @@ func (svc *ZMQService) server_worker(wid int) {
 }
 
 func (svc *ZMQService) process_cmd(item *WorkItem) {
-	log.Println("get item from ", item.workerId, "data:", item.cid, item.cmd.Index )
+	log.Println("get item from ", item.workerId, "data:", item.cid, item.cmd.Index, item.cmd )
+
+	frameCount := fmt.Sprintf("%d", item.cmd.Count)
+	crop := fmt.Sprintf("crop=%d:%d,scale=%d:%d", item.cmd.Width, item.cmd.Height, item.cmd.Width, item.cmd.Height)
+
+	cmd := exec.Command("ffmpeg", "-ss",  "00:05:00",
+	"-i", "/dataset/3dvideo/THE_HOBBIT__THE_DESOLATION_OF_SMAUG_PART_1.Title100_1.left.mkv",
+		"-vf", crop, "-f", "image2pipe", "-frames", frameCount, "-c:v", "rawvideo", "-pix_fmt", "rgb24",  "-f", "rawvideo", "pipe:1")
+	//cmd.Stdout = os.Stdout
+	//cmd.Stderr = os.Stderr
+	//cmd.Run()
+
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		log.Printf("get pipe failed \n")
+	}
+
+	//stderrIn, err := cmd.StderrPipe()
+	//if err != nil {
+	//	log.Printf("get err pipe failed \n")
+	//}
+
+	defer cmd.Wait()
+
+	nBytes, nChunks := int64(0), int64(0)
+	//r := bufio.NewReader(stdout)
+	r := stdout
+	buf := make([]byte, 0, 4*1024)
+
+	_ = cmd.Start()
+
+	//go func() {
+	//	stderr, errStderr = copyAndCapture(os.Stderr, stderrIn)
+	//}()
+
+
+	for {
+		//log.Println("blocking for read")
+		n, err := r.Read(buf[:cap(buf)])
+		//log.Println("reading done")
+		buf = buf[:n]
+		if n == 0 {
+			if err == nil {
+				continue
+			}
+			if err == io.EOF {
+				break
+			}
+			log.Fatal(err)
+		}
+		nChunks++
+		//bigdata[nBytes:n] = buf[:n]
+		//log.Println("copy start from ", nBytes, "with", len(buf))
+		//copy(bigdata[nBytes:nBytes + int64(n)], buf)
+
+		//log.Println("send message", item.cid, reflect.TypeOf(item.cid), len(buf), reflect.TypeOf(buf))
+
+		item.worker.SendMessage(item.cid, buf)
+
+		//log.Println("copy end ", len(buf))
+		nBytes += int64(len(buf))
+		// process buf
+		if err != nil && err != io.EOF {
+			log.Fatal(err)
+		}
+	}
+
+	log.Println("Send bytes N ", nBytes)
 
 }
 

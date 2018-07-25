@@ -32,7 +32,7 @@ func client_task() {
 
 	go func() {
 		for request_nbr := 1; true; request_nbr++ {
-			time.Sleep(time.Second)
+			time.Sleep(time.Second * 3)
 			if state != 0 {
 				log.Println("state not ready")
 				continue
@@ -41,6 +41,9 @@ func client_task() {
 				Code: request_nbr,
 				Names: []string{"aa", "bb"},
 				Index: request_nbr % 100,
+				Count: 10,
+				Width: 448,
+				Height: 448,
 			}
 			out, err := yaml.Marshal(&cmd)
 			if err != nil {
@@ -59,23 +62,23 @@ func client_task() {
 
 	sz := 0
 	for {
-		time.Sleep(10 * time.Millisecond)
+		//time.Sleep(10 * time.Millisecond)
 		mu.Lock()
 		msg, err := client.RecvMessage(zmq.DONTWAIT)
 		//msg, err := client.RecvMessage(0)
 		if err == nil {
 			id, _ := client.GetIdentity()
-			fmt.Println(msg, id, "My ID", my_id)
+			fmt.Println(len(msg), id, "My ID", my_id)
 
 			sz += len(msg[0])
 			log.Println("recv message", reflect.TypeOf(msg[0]), len(msg[0]))
-			//state = 0
+			state = 0
 
 			//break
 		}
 		mu.Unlock()
 
-		log.Println("recv size ", sz)
+		//log.Println("recv size ", sz)
 	}
 }
 
@@ -84,9 +87,9 @@ func main() {
 
 	ch := make(chan int)
 
-	//go client_task()
-	//go client_task()
 	go client_task()
+	go client_task()
+	//go client_task()
 
 	log.Println("waiting for clients")
 

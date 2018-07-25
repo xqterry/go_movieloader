@@ -16,6 +16,8 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	"runtime"
 	"os/exec"
+	"math/rand"
+	"encoding/hex"
 )
 
 const (
@@ -259,15 +261,42 @@ func (svc *ZMQService) server_worker(wid int) {
 	}
 }
 
+func (svc *ZMQService) RandomCrop(src []byte, dst []byte, h int, w int, ch int, cw int, s int) {
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	bw := w - cw
+	bh := h - ch
+
+	aw := r.Intn(bw)
+	ah := r.Intn(bh)
+
+	for y := ah; y < ah + ch; y++ {
+		for x := aw; x < aw + cw; x++ {
+			di := (y - ah) * cw * s + (x - aw) * s
+			si := (y * w + x) * s
+
+			dst[di] = src[si]
+			dst[di + 1] = src[si + 1]
+			dst[di + 2] = src[si + 2]
+		}
+	}
+
+	//return ah, aw
+}
+
 func (svc *ZMQService) process_cmd(item *WorkItem) {
-	log.Println("get item from ", item.workerId, "data:", item.cid, item.cmd.Index, item.cmd )
+	log.Println("get item from ", item.workerId, "data:", hex.Dump([]byte(item.cid)), item.cmd.Index, item.cmd )
 
 	frameCount := fmt.Sprintf("%d", item.cmd.Count)
-	crop := fmt.Sprintf("crop=%d:%d,scale=%d:%d", item.cmd.Width, item.cmd.Height, item.cmd.Width, item.cmd.Height)
+	scale := fmt.Sprintf("scale=%d:%d", item.cmd.Width, item.cmd.Height)
+
+	log.Println("ffmpeg", "-ss",  "00:05:00",
+		"-i", "/dataset/3dvideo/THE_HOBBIT__THE_DESOLATION_OF_SMAUG_PART_1.Title100_1.left.mkv",
+		"-vf", scale, "-f", "image2pipe", "-frames", frameCount, "-c:v", "rawvideo", "-pix_fmt", "rgb24",  "-f", "rawvideo", "pipe:1")
 
 	cmd := exec.Command("ffmpeg", "-ss",  "00:05:00",
 	"-i", "/dataset/3dvideo/THE_HOBBIT__THE_DESOLATION_OF_SMAUG_PART_1.Title100_1.left.mkv",
-		"-vf", crop, "-f", "image2pipe", "-frames", frameCount, "-c:v", "rawvideo", "-pix_fmt", "rgb24",  "-f", "rawvideo", "pipe:1")
+		"-vf", scale, "-f", "image2pipe", "-frames", frameCount, "-c:v", "rawvideo", "-pix_fmt", "rgb24",  "-f", "rawvideo", "pipe:1")
 	//cmd.Stdout = os.Stdout
 	//cmd.Stderr = os.Stderr
 	//cmd.Run()
@@ -284,10 +313,17 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 
 	defer cmd.Wait()
 
+	outFrameSize := item.cmd.CropW * item.cmd.CropH* 3
+	frameSize := item.cmd.Width * item.cmd.Height * 3
+	frameBuf := make([]byte, frameSize, frameSize)
+
 	nBytes, nChunks := int64(0), int64(0)
+	_ = nChunks
 	//r := bufio.NewReader(stdout)
 	r := stdout
-	buf := make([]byte, 0, 512*1024)
+
+	log.Println("OutFrame size ", outFrameSize)
+	buf := make([]byte, outFrameSize, outFrameSize)
 
 	_ = cmd.Start()
 
@@ -296,11 +332,13 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 	//}()
 
 
+	framePos := 0
 	for {
 		//log.Println("blocking for read")
-		n, err := r.Read(buf[:cap(buf)])
+		//n, err := r.Read(buf[:cap(buf)])
 		//log.Println("reading done")
-		buf = buf[:n]
+
+		n, err := r.Read(frameBuf[framePos:frameSize])
 		if n == 0 {
 			if err == nil {
 				continue
@@ -310,18 +348,30 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 			}
 			log.Fatal(err)
 		}
+		framePos += n
+		if framePos < frameSize {
+			//log.Println("Read ", framePos, " need ", frameSize)
+			continue
+		}
+
 		nChunks++
+		framePos = 0
+		// Random Crop
+		svc.RandomCrop(frameBuf, buf, item.cmd.Height, item.cmd.Width, item.cmd.CropH, item.cmd.CropW, 3)
+
+		//log.Println("got frame", nChunks, " crop size", ah, aw, " len ", len(buf))
+
 		//bigdata[nBytes:n] = buf[:n]
 		//log.Println("copy start from ", nBytes, "with", len(buf))
 		//copy(bigdata[nBytes:nBytes + int64(n)], buf)
 
 		//log.Println("send message", item.cid, reflect.TypeOf(item.cid), len(buf), reflect.TypeOf(buf))
 
-		needSend := n
+		needSend := outFrameSize
 		nSentTotal := 0
 		for nSentTotal < needSend {
 			nSent, err := item.worker.SendMessage(item.cid, buf[nSentTotal:])
-			log.Println("Chunk", nChunks, "Sent piece size ", nSent- len(item.cid), " target ", needSend)
+			//log.Println("Sent piece size ", nSent- len(item.cid), " target ", needSend)
 			//log.Println("copy end ", len(buf))
 			nSentTotal += nSent - len(item.cid)
 			// process buf

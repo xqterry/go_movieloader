@@ -8,6 +8,8 @@ type SendCommand struct {
 	Width int		`yaml:"width"`
 	Height int		`yaml:"height"`
 	Movie string		`yaml:"movie"`
+	CropW int		`yaml:"cropw"`
+	CropH int		`yaml:"croph"`
 }
 
 type RecvCommand struct {

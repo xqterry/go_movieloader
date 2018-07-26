@@ -18,6 +18,7 @@ import (
 	"os/exec"
 	"math/rand"
 	"encoding/hex"
+//	"bufio"
 )
 
 const (
@@ -287,15 +288,23 @@ func (svc *ZMQService) RandomCrop(src []byte, dst []byte, h int, w int, ch int, 
 func (svc *ZMQService) process_cmd(item *WorkItem) {
 	log.Println("get item from ", item.workerId, "data:", hex.Dump([]byte(item.cid)), item.cmd.Index, item.cmd )
 
+	fileConf := Config.FindMovieFileConfigByName(item.cmd.Movie)
+	if fileConf == nil {
+	    log.Println("conf not found ", item.cmd.Movie)
+	    return
+	}
+
 	frameCount := fmt.Sprintf("%d", item.cmd.Count)
 	scale := fmt.Sprintf("scale=%d:%d", item.cmd.Width, item.cmd.Height)
+	ss := fileConf.Skip
+	fn := fileConf.Filename
 
-	log.Println("ffmpeg", "-ss",  "00:05:00",
-		"-i", "/dataset/3dvideo/THE_HOBBIT__THE_DESOLATION_OF_SMAUG_PART_1.Title100_1.left.mkv",
+	log.Println("ffmpeg", "-ss",  ss,
+		"-i", fn,
 		"-vf", scale, "-f", "image2pipe", "-frames", frameCount, "-c:v", "rawvideo", "-pix_fmt", "rgb24",  "-f", "rawvideo", "pipe:1")
 
-	cmd := exec.Command("ffmpeg", "-ss",  "00:05:00",
-	"-i", "/dataset/3dvideo/THE_HOBBIT__THE_DESOLATION_OF_SMAUG_PART_1.Title100_1.left.mkv",
+	cmd := exec.Command("ffmpeg", "-ss",  ss,
+	"-i", fn,
 		"-vf", scale, "-f", "image2pipe", "-frames", frameCount, "-c:v", "rawvideo", "-pix_fmt", "rgb24",  "-f", "rawvideo", "pipe:1")
 	//cmd.Stdout = os.Stdout
 	//cmd.Stderr = os.Stderr
@@ -322,7 +331,7 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 	//r := bufio.NewReader(stdout)
 	r := stdout
 
-	log.Println("OutFrame size ", outFrameSize)
+	log.Println("OutFrame size ", outFrameSize, "ffmpeg frame size ", frameSize)
 	buf := make([]byte, outFrameSize, outFrameSize)
 
 	_ = cmd.Start()
@@ -341,16 +350,18 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 		n, err := r.Read(frameBuf[framePos:frameSize])
 		if n == 0 {
 			if err == nil {
+				log.Println("No err but no data")
 				continue
 			}
 			if err == io.EOF {
+				log.Println("fuck eof stdout")
 				break
 			}
 			log.Fatal(err)
 		}
 		framePos += n
 		if framePos < frameSize {
-			//log.Println("Read ", framePos, " need ", frameSize)
+			log.Println("Read ", framePos, " need ", frameSize)
 			continue
 		}
 
@@ -359,7 +370,7 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 		// Random Crop
 		svc.RandomCrop(frameBuf, buf, item.cmd.Height, item.cmd.Width, item.cmd.CropH, item.cmd.CropW, 3)
 
-		//log.Println("got frame", nChunks, " crop size", ah, aw, " len ", len(buf))
+		log.Println("got frame", nChunks, " crop size", " len ", len(buf))
 
 		//bigdata[nBytes:n] = buf[:n]
 		//log.Println("copy start from ", nBytes, "with", len(buf))

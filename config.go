@@ -42,6 +42,16 @@ func NewMoviesConfig(fn string) *MoviesConfig {
 	return conf
 }
 
+func (conf *MoviesConfig) FindMovieFileConfigByName(name string) *MovieFileConfig {
+    for _, c := range conf.Movies {
+        if c.Name == name {
+            return &c
+
+        }
+    }
+    return nil
+}
+
 func test() {
 	a := MoviesConfig{
 		[]MovieFileConfig{

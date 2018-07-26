@@ -1,10 +1,10 @@
 movies:
   - name: movie1
-    file: /dataset/movie_1.mkv
-    ss: 00:01:00
+    file: /home/dt8/movies/00001.m2ts
+    ss: 00:05:00
   - name: movie2
-    file: /dataset/movie_2.mkv
-    ss: 00:03:00
+    file: /home/dt8/movies/01-007.m2ts
+    ss: 00:13:00
   - name: movie3
     file: /dataset/movie_3.mp4
     ss: 00:02:00

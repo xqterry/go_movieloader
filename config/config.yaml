@@ -6,7 +6,7 @@ movies:
     file: /home/dt8/movies/01-007.m2ts
     ss: 00:13:00
   - name: movie3
-    file: /dataset/movie_3.mp4
-    ss: 00:02:00
+    file: /dataset/WRATH_OF_THE_TITANS.Left_Right.mkv
+    ss: 00:12:00
 params: "-pix_fmt rgb24 -c:v rawvideo"
 crop: 896

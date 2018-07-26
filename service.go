@@ -361,7 +361,7 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 		}
 		framePos += n
 		if framePos < frameSize {
-			log.Println("Read ", framePos, " need ", frameSize)
+			//log.Println("Read ", framePos, " need ", frameSize)
 			continue
 		}
 
@@ -370,7 +370,7 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 		// Random Crop
 		svc.RandomCrop(frameBuf, buf, item.cmd.Height, item.cmd.Width, item.cmd.CropH, item.cmd.CropW, 3)
 
-		log.Println("got frame", nChunks, " crop size", " len ", len(buf))
+		//log.Println("got frame", nChunks, " crop size", " len ", len(buf))
 
 		//bigdata[nBytes:n] = buf[:n]
 		//log.Println("copy start from ", nBytes, "with", len(buf))
@@ -394,7 +394,7 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 		nBytes += int64(needSend)
 	}
 
-	log.Println("Send bytes N ", nBytes)
+	log.Println("Send bytes N ", nBytes, " frames ", nChunks)
 
 }
 

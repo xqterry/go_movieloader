@@ -2,11 +2,42 @@ movies:
   - name: movie1
     file: /home/dt8/movies/00001.m2ts
     ss: 00:05:00
+    w: 1920
+    h: 1080
   - name: movie2
     file: /home/dt8/movies/01-007.m2ts
     ss: 00:13:00
+    w: 1920
+    h: 1080
   - name: movie3
+    file: /home/dt8/movies/01-009.m2ts
+    ss: 00:10:00
+    w: 1920
+    h: 1080
+  - name: movie4
+    file: /home/dt8/movies/01-010.m2ts
+    ss: 00:10:00
+    w: 1920
+    h: 1080
+  - name: movie5
+    file: /home/dt8/movies/bankok_killer.m2ts
+    ss: 00:10:00
+    w: 1920
+    h: 1080
+  - name: movie6
+    file: /home/dt8/movies/clear_and_present_danger.m2ts
+    ss: 00:10:00
+    w: 1920
+    h: 1080
+  - name: movie7
+    file: /home/dt8/movies/the_mask.m2ts
+    ss: 00:10:00
+    w: 1920
+    h: 1080
+  - name: home_movie3
     file: /dataset/WRATH_OF_THE_TITANS.Left_Right.mkv
     ss: 00:12:00
+    w: 3840
+    h: 1080
 params: "-pix_fmt rgb24 -c:v rawvideo"
 crop: 896

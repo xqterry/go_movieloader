@@ -10,6 +10,8 @@ type MovieFileConfig struct {
 	Name string		`yaml:"name"`
 	Filename string	`yaml:"file"`
 	Skip string		`yaml:"ss"`
+	Width int   `yaml:"w"`
+	Height int  `yaml:"h"`
 }
 
 type MoviesConfig struct {
@@ -55,8 +57,8 @@ func (conf *MoviesConfig) FindMovieFileConfigByName(name string) *MovieFileConfi
 func test() {
 	a := MoviesConfig{
 		[]MovieFileConfig{
-			{"a", "fa", "10"},
-			{"b", "fb", "20"},
+			{"a", "fa", "10", 800, 600},
+			{"b", "fb", "20", 800, 600},
 		},
 		"-abc",
 		888,

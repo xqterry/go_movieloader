@@ -296,17 +296,22 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 
 	frameCount := fmt.Sprintf("%d", item.cmd.Count)
 	//scale := fmt.Sprintf("scale=%d:%d", item.cmd.Width, item.cmd.Height)
-	crop := fmt.Sprintf("crop=%d:%d", item.cmd.Width, item.cmd.Height)
+	vf := fmt.Sprintf("crop=%d:%d", item.cmd.Width, item.cmd.Height)
 	ss := fileConf.Skip
 	fn := fileConf.Filename
 
+	if fileConf.Width > 1920 {
+		vf = fmt.Sprintf("scale=%d:%d", item.cmd.Width, item.cmd.Height)
+	}
+
+
 	log.Println("ffmpeg", "-ss",  ss,
 		"-i", fn,
-		"-vf", crop, "-f", "image2pipe", "-frames", frameCount, "-c:v", "rawvideo", "-pix_fmt", "rgb24",  "-f", "rawvideo", "pipe:1")
+		"-vf", vf, "-f", "image2pipe", "-frames", frameCount, "-c:v", "rawvideo", "-pix_fmt", "rgb24",  "-f", "rawvideo", "pipe:1")
 
 	cmd := exec.Command("ffmpeg", "-ss",  ss,
 	"-i", fn,
-		"-vf", crop, "-f", "image2pipe", "-frames", frameCount, "-c:v", "rawvideo", "-pix_fmt", "rgb24",  "-f", "rawvideo", "pipe:1")
+		"-vf", vf, "-f", "image2pipe", "-frames", frameCount, "-c:v", "rawvideo", "-pix_fmt", "rgb24",  "-f", "rawvideo", "pipe:1")
 	//cmd.Stdout = os.Stdout
 	//cmd.Stderr = os.Stderr
 	//cmd.Run()

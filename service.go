@@ -19,6 +19,7 @@ import (
 	"math/rand"
 	"encoding/hex"
 //	"bufio"
+	"bufio"
 )
 
 const (
@@ -302,8 +303,15 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 
 	frameWidth := item.cmd.Width
 	frameHeight := item.cmd.Height
+	if frameWidth > fileConf.Width {
+		frameWidth = fileConf.Width
+	}
 
-	vf := fmt.Sprintf("crop=%d:%d", item.cmd.Width, item.cmd.Height)
+	if frameHeight > fileConf.Height{
+		frameHeight = fileConf.Height
+	}
+
+	vf := fmt.Sprintf("crop=%d:%d", frameWidth, frameHeight)
 	if item.cmd.Scale == true && fileConf.Width > 1920 {
 		vf = fmt.Sprintf("scale=%d:%d", item.cmd.Width, item.cmd.Height)
 		frameWidth = item.cmd.Width
@@ -340,10 +348,10 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 
 	nBytes, nChunks := int64(0), int64(0)
 	_ = nChunks
-	//r := bufio.NewReader(stdout)
-	r := stdout
+	r := bufio.NewReader(stdout)
+	//r := stdout
 
-	log.Println("OutFrame size ", outFrameSize, "ffmpeg frame size ", frameSize)
+	log.Println(": OutFrame size ", outFrameSize, "ffmpeg frame size ", frameSize)
 	buf := make([]byte, outFrameSize, outFrameSize)
 
 	_ = cmd.Start()
@@ -357,9 +365,10 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 	for {
 		//log.Println("blocking for read")
 		//n, err := r.Read(buf[:cap(buf)])
-		//log.Println("reading done")
+		//log.Println("-> reading # ", item.workerId)
 
 		n, err := r.Read(frameBuf[framePos:frameSize])
+		//log.Println("<- reading done # ", item.workerId, n)
 		if n == 0 {
 			if err == nil {
 				log.Println("No err but no data")
@@ -373,16 +382,16 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 		}
 		framePos += n
 		if framePos < frameSize {
-			//log.Println("Read ", framePos, " need ", frameSize)
+			//log.Println(item.workerId, "Read ", framePos, " need ", frameSize)
 			continue
 		}
 
 		nChunks++
 		framePos = 0
 		// Random Crop
-		svc.RandomCrop(frameBuf, buf, item.cmd.Height, item.cmd.Width, item.cmd.CropH, item.cmd.CropW, 3)
+		svc.RandomCrop(frameBuf, buf, frameHeight, frameWidth, item.cmd.CropH, item.cmd.CropW, 3)
 
-		//log.Println("got frame", nChunks, " crop size", " len ", len(buf))
+		//log.Println(item.workerId, "got frame", nChunks, " crop size", " len ", len(buf))
 
 		//bigdata[nBytes:n] = buf[:n]
 		//log.Println("copy start from ", nBytes, "with", len(buf))
@@ -407,7 +416,7 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 	}
 
 	log.Println("Send bytes N ", nBytes, " frames ", nChunks)
-
+	stdout.Close()
 }
 
 
@@ -428,7 +437,7 @@ func (svc *ZMQService) process_queue(pid int) {
 
 		if item != nil {
 			item.workerId = pid
-			svc.process_cmd(item)
+			go svc.process_cmd(item)
 		} else {
 			time.Sleep(time.Microsecond * 10)
 			runtime.Gosched()

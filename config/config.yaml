@@ -34,6 +34,21 @@ movies:
     ss: 00:10:00
     w: 1920
     h: 1080
+  - name: anim1
+    file: /home/dt8/movies/animation/miyazaki/from.up.on.poppy.hill.2011.1080p.bluray.x264-nodlabs.mkv
+    ss: 00:15:00
+    w: 1920
+    h: 1080
+  - name: anim2
+    file: /home/dt8/movies/animation/miyazaki/[NoobSubs] The Borrower Arrietty (1080p Blu-ray eng dub 8bit AC3).mp4
+    ss: 00:15:00
+    w: 1920
+    h: 1080
+  - name: anim3
+    file: /home/dt8/movies/animation/miyazaki/[Ponyo_on_the_Cliff][x264_aac][1920×1080]9DualAudio(chi-can-jap-eng-ita-rus-spa-fre-por).mkv
+    ss: 00:15:00
+    w: 1920
+    h: 1080
   - name: home_movie3
     file: /dataset/WRATH_OF_THE_TITANS.Left_Right.mkv
     ss: 00:12:00

@@ -296,12 +296,18 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 
 	frameCount := fmt.Sprintf("%d", item.cmd.Count)
 	//scale := fmt.Sprintf("scale=%d:%d", item.cmd.Width, item.cmd.Height)
-	vf := fmt.Sprintf("crop=%d:%d", item.cmd.Width, item.cmd.Height)
+
 	ss := fileConf.Skip
 	fn := fileConf.Filename
 
-	if fileConf.Width > 1920 {
+	frameWidth := item.cmd.Width
+	frameHeight := item.cmd.Height
+
+	vf := fmt.Sprintf("crop=%d:%d", item.cmd.Width, item.cmd.Height)
+	if item.cmd.Scale == true && fileConf.Width > 1920 {
 		vf = fmt.Sprintf("scale=%d:%d", item.cmd.Width, item.cmd.Height)
+		frameWidth = item.cmd.Width
+		frameHeight = item.cmd.Height
 	}
 
 
@@ -329,7 +335,7 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 	defer cmd.Wait()
 
 	outFrameSize := item.cmd.CropW * item.cmd.CropH* 3
-	frameSize := item.cmd.Width * item.cmd.Height * 3
+	frameSize := frameWidth * frameHeight * 3
 	frameBuf := make([]byte, frameSize, frameSize)
 
 	nBytes, nChunks := int64(0), int64(0)

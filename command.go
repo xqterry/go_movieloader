@@ -10,6 +10,7 @@ type SendCommand struct {
 	Movie string		`yaml:"movie"`
 	CropW int		`yaml:"cropw"`
 	CropH int		`yaml:"croph"`
+	Scale bool		`yaml:"scale"`
 }
 
 type RecvCommand struct {

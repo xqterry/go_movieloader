@@ -457,7 +457,7 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 		//cmd.Run()
 
 		nFrames := svc._exec_cmd(cmd, item, frameWidth, frameHeight)
-		log.Println(nFrames)
+		log.Println(fileConf.Name, nFrames)
 	}
 }
 

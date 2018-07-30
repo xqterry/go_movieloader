@@ -46,19 +46,29 @@ movies:
     ss:
       - 00:15:00
     w: 1920
-    h: 1080
+    h: 1040
   - name: anim2
-    file: /home/dt8/movies/animation/miyazaki/[NoobSubs] The Borrower Arrietty (1080p Blu-ray eng dub 8bit AC3).mp4
+    file: "/home/dt8/movies/animation/miyazaki/[NoobSubs]TheBorrowerArrietty_1080pBlu-rayengdub8bitAC3_.mp4"
     ss:
       - 00:15:00
+      - 00:35:00
     w: 1920
-    h: 1080
+    h: 1038
   - name: anim3
     file: /home/dt8/movies/animation/miyazaki/[Ponyo_on_the_Cliff][x264_aac][1920×1080]9DualAudio(chi-can-jap-eng-ita-rus-spa-fre-por).mkv
     ss:
       - 00:15:00
+      - 00:20:10
     w: 1920
     h: 1080
+  - name: valid1
+    file: /home/dt8/movies/animation/瑶玲电影剪辑测试片段.mov
+    ss: 
+      - 00:00:10
+      - 00:00:30
+    w: 720
+    h: 576
+
   - name: home_movie3
     file: /dataset/WRATH_OF_THE_TITANS.Left_Right.mkv
     ss:

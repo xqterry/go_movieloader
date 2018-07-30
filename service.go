@@ -272,6 +272,12 @@ func (svc *ZMQService) RandomCrop(src []byte, dst []byte, h int, w int, ch int, 
 
 	aw := r.Intn(bw)
 	ah := r.Intn(bh)
+	ah += ah % 2
+
+	// keep H % 2 == 0
+	if ah == bh {
+		ah = bh - 2
+	}
 
 	for y := ah; y < ah + ch; y++ {
 		for x := aw; x < aw + cw; x++ {

@@ -4,12 +4,15 @@ import (
 	"log"
 	"io/ioutil"
 	"gopkg.in/yaml.v2"
+	"regexp"
+	"math/rand"
+	"time"
 )
 
 type MovieFileConfig struct {
 	Name string		`yaml:"name"`
 	Filename string	`yaml:"file"`
-	Skip string		`yaml:"ss"`
+	Skip []string		`yaml:"ss"`
 	Width int   `yaml:"w"`
 	Height int  `yaml:"h"`
 }
@@ -48,17 +51,38 @@ func (conf *MoviesConfig) FindMovieFileConfigByName(name string) *MovieFileConfi
     for _, c := range conf.Movies {
         if c.Name == name {
             return &c
-
         }
     }
     return nil
 }
 
+func (conf *MoviesConfig) FindMatchedConfigs(name string) []*MovieFileConfig {
+	var ret []*MovieFileConfig
+	for i, c := range conf.Movies {
+		m, err := regexp.MatchString(name, c.Name)
+		if err != nil {
+			continue
+		}
+
+		if m {
+			ret = append(ret, &conf.Movies[i])
+		}
+	}
+
+	rand.Seed(time.Now().Unix())
+	for i := len(ret) - 1; i > 0; i-- {
+		j := rand.Intn(i + 1)
+		ret[i], ret[j] = ret[j], ret[i]
+	}
+
+	return ret
+}
+
 func test() {
 	a := MoviesConfig{
 		[]MovieFileConfig{
-			{"a", "fa", "10", 800, 600},
-			{"b", "fb", "20", 800, 600},
+			{"a", "fa", []string {"10"}, 800, 600},
+			{"b", "fb", []string {"20"}, 800, 600},
 		},
 		"-abc",
 		888,

@@ -20,6 +20,7 @@ import (
 	"encoding/hex"
 //	"bufio"
 	"bufio"
+	"strings"
 )
 
 const (
@@ -286,50 +287,7 @@ func (svc *ZMQService) RandomCrop(src []byte, dst []byte, h int, w int, ch int, 
 	//return ah, aw
 }
 
-func (svc *ZMQService) process_cmd(item *WorkItem) {
-	log.Println("get item from ", item.workerId, "data:", hex.Dump([]byte(item.cid)), item.cmd.Index, item.cmd )
-
-	fileConf := Config.FindMovieFileConfigByName(item.cmd.Movie)
-	if fileConf == nil {
-	    log.Println("conf not found ", item.cmd.Movie)
-	    return
-	}
-
-	frameCount := fmt.Sprintf("%d", item.cmd.Count)
-	//scale := fmt.Sprintf("scale=%d:%d", item.cmd.Width, item.cmd.Height)
-
-	ss := fileConf.Skip
-	fn := fileConf.Filename
-
-	frameWidth := item.cmd.Width
-	frameHeight := item.cmd.Height
-	if frameWidth > fileConf.Width {
-		frameWidth = fileConf.Width
-	}
-
-	if frameHeight > fileConf.Height{
-		frameHeight = fileConf.Height
-	}
-
-	vf := fmt.Sprintf("crop=%d:%d", frameWidth, frameHeight)
-	if item.cmd.Scale == true && fileConf.Width > 1920 {
-		vf = fmt.Sprintf("scale=%d:%d", item.cmd.Width, item.cmd.Height)
-		frameWidth = item.cmd.Width
-		frameHeight = item.cmd.Height
-	}
-
-
-	log.Println("ffmpeg", "-ss",  ss,
-		"-i", fn,
-		"-vf", vf, "-f", "image2pipe", "-frames", frameCount, "-c:v", "rawvideo", "-pix_fmt", "rgb24",  "-f", "rawvideo", "pipe:1")
-
-	cmd := exec.Command("ffmpeg", "-ss",  ss,
-	"-i", fn,
-		"-vf", vf, "-f", "image2pipe", "-frames", frameCount, "-c:v", "rawvideo", "-pix_fmt", "rgb24",  "-f", "rawvideo", "pipe:1")
-	//cmd.Stdout = os.Stdout
-	//cmd.Stderr = os.Stderr
-	//cmd.Run()
-
+func (svc *ZMQService) _exec_cmd(cmd *exec.Cmd, item *WorkItem, frameWidth int, frameHeight int) (frameCount int64) {
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		log.Printf("get pipe failed \n")
@@ -417,6 +375,84 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 
 	log.Println("Send bytes N ", nBytes, " frames ", nChunks)
 	stdout.Close()
+
+	return nChunks
+}
+
+func (svc *ZMQService) process_cmd(item *WorkItem) {
+	log.Println("get item from ", item.workerId, "data:", hex.Dump([]byte(item.cid)), item.cmd.Index, item.cmd )
+
+	var conf_array []*MovieFileConfig
+	wild := false
+	if strings.Index(item.cmd.Movie, "*") != -1 {
+		wild = true
+	}
+
+	if wild == false {
+		fileConf := Config.FindMovieFileConfigByName(item.cmd.Movie)
+		if fileConf == nil {
+			log.Println("conf not found ", item.cmd.Movie)
+			return
+		}
+		conf_array = append(conf_array, fileConf)
+	} else {
+		conf_array = Config.FindMatchedConfigs(item.cmd.Movie)
+	}
+
+
+	//scale := fmt.Sprintf("scale=%d:%d", item.cmd.Width, item.cmd.Height)
+
+	pc := item.cmd.Count
+	if len(conf_array) > 0 {
+		pc = item.cmd.Count / len(conf_array)
+	}
+	mod := item.cmd.Count % pc
+	var cc []int
+	for _, _ = range(conf_array) {
+		cc = append(cc, pc)
+	}
+
+	if mod != 0 {
+		cc[0] += mod
+	}
+
+	for i, fileConf := range(conf_array) {
+		frameCount := fmt.Sprintf("%d", cc[i])
+		//ss := fileConf.Skip
+		ss := fileConf.Skip[rand.Intn(len(fileConf.Skip))]
+		fn := fileConf.Filename
+
+		frameWidth := item.cmd.Width
+		frameHeight := item.cmd.Height
+		if frameWidth > fileConf.Width {
+			frameWidth = fileConf.Width
+		}
+
+		if frameHeight > fileConf.Height {
+			frameHeight = fileConf.Height
+		}
+
+		vf := fmt.Sprintf("crop=%d:%d", frameWidth, frameHeight)
+		if item.cmd.Scale == true && fileConf.Width > 1920 {
+			vf = fmt.Sprintf("scale=%d:%d", item.cmd.Width, item.cmd.Height)
+			frameWidth = item.cmd.Width
+			frameHeight = item.cmd.Height
+		}
+
+		log.Println("ffmpeg", "-ss", ss,
+			"-i", fn,
+			"-vf", vf, "-f", "image2pipe", "-frames", frameCount, "-c:v", "rawvideo", "-pix_fmt", "rgb24", "-f", "rawvideo", "pipe:1")
+
+		cmd := exec.Command("ffmpeg", "-ss", ss,
+			"-i", fn,
+			"-vf", vf, "-f", "image2pipe", "-frames", frameCount, "-c:v", "rawvideo", "-pix_fmt", "rgb24", "-f", "rawvideo", "pipe:1")
+		//cmd.Stdout = os.Stdout
+		//cmd.Stderr = os.Stderr
+		//cmd.Run()
+
+		nFrames := svc._exec_cmd(cmd, item, frameWidth, frameHeight)
+		log.Println(nFrames)
+	}
 }
 
 

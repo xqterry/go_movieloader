@@ -73,3 +73,16 @@ func TestReg(t *testing.T){
 		t.Fatal("not same")
 	}
 }
+
+func abc(arr ...int) int {
+	m := 0
+	for _, a := range(arr) {
+		m += a
+	}
+	return m
+}
+func TestMultiparams(t *testing.T) {
+	arr := []int{1, 2, 3}
+	d := abc(arr...)
+	t.Log(d)
+}

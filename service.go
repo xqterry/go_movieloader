@@ -348,12 +348,19 @@ func (svc *ZMQService) _exec_cmd(cmd *exec.Cmd, item *WorkItem, frameWidth int, 
 		if framePos < frameSize {
 			//log.Println(item.workerId, "Read ", framePos, " need ", frameSize)
 			continue
+		} else {
+			//log.Println("frame", nChunks, " complete")
 		}
 
 		nChunks++
 		framePos = 0
-		// Random Crop
-		svc.RandomCrop(frameBuf, buf, frameHeight, frameWidth, item.cmd.CropH, item.cmd.CropW, 3)
+
+		if item.cmd.CenterCrop == false {
+			// Random Crop
+			svc.RandomCrop(frameBuf, buf, frameHeight, frameWidth, item.cmd.CropH, item.cmd.CropW, 3)
+		} else {
+			copy(buf[:frameSize], frameBuf)
+		}
 
 		//log.Println(item.workerId, "got frame", nChunks, " crop size", " len ", len(buf))
 
@@ -408,11 +415,15 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 
 	//scale := fmt.Sprintf("scale=%d:%d", item.cmd.Width, item.cmd.Height)
 
+	// count is 0 return all frames (only for evaluation and short samples)
 	pc := item.cmd.Count
 	if len(conf_array) > 0 {
 		pc = item.cmd.Count / len(conf_array)
 	}
-	mod := item.cmd.Count % pc
+	mod := 0
+	if pc != 0 {
+		mod = item.cmd.Count % pc
+	}
 	var cc []int
 	for _, _ = range(conf_array) {
 		cc = append(cc, pc)
@@ -422,6 +433,8 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 		cc[0] += mod
 	}
 
+	actualFrames := int64(0)
+
 	for i, fileConf := range(conf_array) {
 		frameCount := fmt.Sprintf("%d", cc[i])
 		//ss := fileConf.Skip
@@ -430,6 +443,12 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 
 		frameWidth := item.cmd.Width
 		frameHeight := item.cmd.Height
+
+		if item.cmd.CenterCrop {
+			frameWidth = item.cmd.CropW
+			frameHeight = item.cmd.CropH
+		}
+
 		if frameWidth > fileConf.Width {
 			frameWidth = fileConf.Width
 		}
@@ -439,25 +458,60 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 		}
 
 		vf := fmt.Sprintf("crop=%d:%d", frameWidth, frameHeight)
+
 		if item.cmd.Scale == true && fileConf.Width > 1920 {
 			vf = fmt.Sprintf("scale=%d:%d", item.cmd.Width, item.cmd.Height)
 			frameWidth = item.cmd.Width
 			frameHeight = item.cmd.Height
 		}
 
-		log.Println("ffmpeg", "-ss", ss,
-			"-i", fn,
-			"-vf", vf, "-f", "image2pipe", "-frames", frameCount, "-c:v", "rawvideo", "-pix_fmt", "rgb24", "-f", "rawvideo", "pipe:1")
+		args := make([]string, 0)
 
-		cmd := exec.Command("ffmpeg", "-ss", ss,
-			"-i", fn,
-			"-vf", vf, "-f", "image2pipe", "-frames", frameCount, "-c:v", "rawvideo", "-pix_fmt", "rgb24", "-f", "rawvideo", "pipe:1")
+		if cc[i] > 0 {
+			args = append(args, "-ss")
+			args = append(args, ss)
+		}
+		args = append(args, "-i")
+		args = append(args, fn)
+		args = append(args, "-f")
+		args = append(args, "image2pipe")
+
+		args = append(args, "-vf")
+		args = append(args, vf)
+
+		if cc[i] > 0 {
+			args = append(args, "-frames")
+			args = append(args, frameCount)
+		}
+
+		args = append(args, "-c:v")
+		args = append(args, "rawvideo")
+		args = append(args, "-pix_fmt")
+		args = append(args, "rgb24")
+		args = append(args, "-f")
+		args = append(args, "rawvideo")
+		args = append(args, "pipe:1")
+
+		iargs := make([]interface{}, len(args))
+		for i, v := range args {
+			iargs[i] = v
+		}
+		log.Println(iargs...)
+
+		cmd := exec.Command("ffmpeg", args...)
 		//cmd.Stdout = os.Stdout
 		//cmd.Stderr = os.Stderr
 		//cmd.Run()
 
 		nFrames := svc._exec_cmd(cmd, item, frameWidth, frameHeight)
 		log.Println(fileConf.Name, nFrames)
+
+		actualFrames += nFrames
+	}
+
+	if item.cmd.Count == 0 {
+		nSent, _ := item.worker.SendMessage(item.cid, []byte("FEND"))
+		log.Println("sent all ", nSent, actualFrames)
 	}
 }
 

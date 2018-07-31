@@ -11,6 +11,7 @@ type SendCommand struct {
 	CropW int		`yaml:"cropw"`
 	CropH int		`yaml:"croph"`
 	Scale bool		`yaml:"scale"`
+	CenterCrop bool 	`yaml:"centercrop"`
 }
 
 type RecvCommand struct {

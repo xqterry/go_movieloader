@@ -464,6 +464,7 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 			frameWidth = item.cmd.Width
 			frameHeight = item.cmd.Height
 		}
+		vf = fmt.Sprintf("%s,select='eq(pict_type\\, I)'", vf)
 
 		args := make([]string, 0)
 

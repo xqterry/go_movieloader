@@ -15,6 +15,8 @@ type MovieFileConfig struct {
 	Skip []string		`yaml:"ss"`
 	Width int   `yaml:"w"`
 	Height int  `yaml:"h"`
+	Type string   `yaml:"type"`
+	Count int 	`yaml:"count"`
 }
 
 type MoviesConfig struct {
@@ -78,21 +80,21 @@ func (conf *MoviesConfig) FindMatchedConfigs(name string) []*MovieFileConfig {
 	return ret
 }
 
-func test() {
-	a := MoviesConfig{
-		[]MovieFileConfig{
-			{"a", "fa", []string {"10"}, 800, 600},
-			{"b", "fb", []string {"20"}, 800, 600},
-		},
-		"-abc",
-		888,
-	}
-	log.Printf("See test %v", a)
-	sa, err := yaml.Marshal(&a)
-	log.Println(string(sa), err)
-
-	//ja, err := json.Marshal(&a)
-	//log.Println(string(ja), ja, err)
-
-	log.Println("Can I access Config ? ", Config)
-}
+//func test() {
+//	a := MoviesConfig{
+//		[]MovieFileConfig{
+//			{"a", "fa", []string {"10"}, 800, 600, "video"},
+//			{"b", "fb", []string {"20"}, 800, 600, "image"},
+//		},
+//		"-abc",
+//		888,
+//	}
+//	log.Printf("See test %v", a)
+//	sa, err := yaml.Marshal(&a)
+//	log.Println(string(sa), err)
+//
+//	//ja, err := json.Marshal(&a)
+//	//log.Println(string(ja), ja, err)
+//
+//	log.Println("Can I access Config ? ", Config)
+//}

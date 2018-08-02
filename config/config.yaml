@@ -113,5 +113,19 @@ movies:
       - 00:12:00
     w: 1920
     h: 800
+  - name: home_valid2
+    file: /dataset/3dvideo/wedding.mkv
+    ss:
+      - 00:00:00
+    w: 1920
+    h: 1080
+  - name: home_pic
+    file: /dataset/uban100/test/SRF_2/target/BSD100_%03d.png
+    ss:
+      - 00:00:00
+    w: 320
+    h: 480
+    type: images
+    count: 100
 params: "-pix_fmt rgb24 -c:v rawvideo"
 crop: 896

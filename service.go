@@ -474,7 +474,7 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 				frameHeight = item.cmd.CropH
 			}
 
-			if item.cmd.Scale || need_scale {
+			if (item.cmd.Scale && fileConf.Width > 1920) || need_scale {
 				vf = fmt.Sprintf("scale=%d:%d", item.cmd.Width, item.cmd.Height)
 				frameWidth = item.cmd.Width
 				frameHeight = item.cmd.Height

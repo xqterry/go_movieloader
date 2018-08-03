@@ -415,7 +415,9 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 	check_array := make([]*MovieFileConfig, 0)
 	for _, conf := range conf_array {
 		if _, err := os.Stat(conf.Filename); os.IsNotExist(err) {
-			continue
+			if conf.Type != "images" {
+				continue
+			}
 		}
 		check_array = append(check_array, conf)
 	}
@@ -425,6 +427,10 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 	if len(conf_array) == 0 {
 		log.Println("find data config count ", len(conf_array))
 		return
+	}
+
+	for _, c := range conf_array {
+		log.Println("Conf file ", c.Filename)
 	}
 
 	//scale := fmt.Sprintf("scale=%d:%d", item.cmd.Width, item.cmd.Height)

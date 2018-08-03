@@ -86,3 +86,17 @@ func TestMultiparams(t *testing.T) {
 	d := abc(arr...)
 	t.Log(d)
 }
+
+func TestMatch(t *testing.T) {
+	ss := []string{"^4k.[^:pic:]|^movie*", "anim2", "movie1", "home_movie1", "home_anim1"}
+
+	conf := NewMoviesConfig("./config/config.yaml")
+	for _, s := range (ss) {
+		slice := conf.FindMatchedConfigs(s)
+		t.Log("try match ", s)
+		for _, c := range (slice) {
+			t.Log(c.Name)
+		}
+		t.Log("----- ")
+	}
+}

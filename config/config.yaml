@@ -117,6 +117,10 @@ movies:
     file: /dataset/3dvideo/wedding.mkv
     ss:
       - 00:00:00
+      - 00:00:20
+      - 00:00:40
+      - 00:01:00
+      - 00:01:20
     w: 1920
     h: 1080
   - name: home_pic

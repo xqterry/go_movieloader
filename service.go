@@ -397,7 +397,7 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 
 	var conf_array []*MovieFileConfig
 	wild := false
-	if strings.Index(item.cmd.Movie, "*") != -1 {
+	if strings.Index(item.cmd.Movie, "*") != -1 || strings.Index(item.cmd.Movie, "^") != -1{
 		wild = true
 	}
 
@@ -412,6 +412,20 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 		conf_array = Config.FindMatchedConfigs(item.cmd.Movie)
 	}
 
+	check_array := make([]*MovieFileConfig, 0)
+	for _, conf := range conf_array {
+		if _, err := os.Stat(conf.Filename); os.IsNotExist(err) {
+			continue
+		}
+		check_array = append(check_array, conf)
+	}
+
+	conf_array = check_array
+
+	if len(conf_array) == 0 {
+		log.Println("find data config count ", len(conf_array))
+		return
+	}
 
 	//scale := fmt.Sprintf("scale=%d:%d", item.cmd.Width, item.cmd.Height)
 

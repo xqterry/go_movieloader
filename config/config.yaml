@@ -7,6 +7,8 @@ movies:
       - 01:05:00
     w: 1920
     h: 1080
+    duration: 02:00:00
+    framerate: 24
   - name: movie2
     file: /home/dt8/movies/01-007.m2ts
     ss:
@@ -14,6 +16,8 @@ movies:
       - 00:35:00
     w: 1920
     h: 1080
+    duration: 02:00:00
+    framerate: 24
   - name: movie3
     file: /home/dt8/movies/01-009.m2ts
     ss:
@@ -21,6 +25,8 @@ movies:
       - 00:35:00
     w: 1920
     h: 1080
+    duration: 02:00:00
+    framerate: 24
   - name: movie4
     file: /home/dt8/movies/01-010.m2ts
     ss:
@@ -29,24 +35,32 @@ movies:
       - 00:45:00
     w: 1920
     h: 1080
+    duration: 02:00:00
+    framerate: 24
   - name: disable_movie5
     file: /home/dt8/movies/bankok_killer.m2ts
     ss:
       - 00:10:00
     w: 1920
     h: 1080
+    duration: 02:00:00
+    framerate: 24
   - name: movie6
     file: /home/dt8/movies/clear_and_present_danger.m2ts
     ss:
       - 00:10:00
     w: 1920
     h: 1080
+    duration: 02:00:00
+    framerate: 24
   - name: movie7
     file: /home/dt8/movies/the_mask.m2ts
     ss:
       - 00:10:00
     w: 1920
     h: 1080
+    duration: 02:00:00
+    framerate: 24
   - name: 4k_lala
     file: /media/dt8/My Passport/4K/La.La.Land.2016.2160p.BluRay.HEVC.TrueHD.7.1.Atmos-TERMiNAL/BDMV/STREAM/00000.m2ts
     ss:
@@ -55,6 +69,8 @@ movies:
       - 01:40:00
     w: 3840
     h: 2160
+    duration: 02:00:00
+    framerate: 24
   - name: 4k_arr
     file: /media/dt8/My Passport/4K/Arrival.2016.2160p.BluRay.HEVC.DTS-HD.MA.7.1-TERMiNAL/BDMV/STREAM/00001.m2ts
     ss:
@@ -63,6 +79,8 @@ movies:
       - 01:20:00
     w: 3840
     h: 2160
+    duration: 02:00:00
+    framerate: 24
   - name: 4k_Fan
     file: /media/dt8/My Passport/4K/Fantastic.Beasts.and.Where.to.Find.Them.2016.2160p.BluRay.HEVC.TrueHD.7.1.Atmos-SUPERSIZE/BDMV/STREAM/00001.m2ts
     ss:
@@ -71,6 +89,8 @@ movies:
       - 01:20:00
     w: 3840
     h: 2160
+    duration: 02:00:00
+    framerate: 24
   - name: hq_movieface
     file: /media/dt5/movie_face.yuv
     ss:
@@ -85,6 +105,7 @@ movies:
     w: 2048
     h: 858
     type: yuv
+    duration: 02:00:00
     framerate: 24
   - name: 4k_face01
     file: /media/dt5.hdd2/face/crop_01/img_%08d.png
@@ -108,6 +129,8 @@ movies:
       - 00:15:00
     w: 1920
     h: 1040
+    duration: 02:00:00
+    framerate: 24
   - name: anim2
     file: "/home/dt8/movies/animation/miyazaki/[NoobSubs]TheBorrowerArrietty_1080pBlu-rayengdub8bitAC3_.mp4"
     ss:
@@ -115,6 +138,8 @@ movies:
       - 00:35:00
     w: 1920
     h: 1038
+    duration: 02:00:00
+    framerate: 24
   - name: anim3
     file: /home/dt8/movies/animation/miyazaki/[Ponyo_on_the_Cliff][x264_aac][1920×1080]9DualAudio(chi-can-jap-eng-ita-rus-spa-fre-por).mkv
     ss:
@@ -122,6 +147,8 @@ movies:
       - 00:20:10
     w: 1920
     h: 1080
+    duration: 02:00:00
+    framerate: 24
   - name: valid1
     file: /home/dt8/movies/animation/瑶玲电影剪辑测试片段.mov
     ss: 
@@ -129,7 +156,8 @@ movies:
       - 00:00:30
     w: 720
     h: 576
-
+    duration: 02:00:00
+    framerate: 24
   - name: home_movie3
     file: /dataset/WRATH_OF_THE_TITANS.Left_Right.mkv
     ss:
@@ -138,12 +166,16 @@ movies:
       - 00:14:00
     w: 3840
     h: 1080
+    duration: 02:00:00
+    framerate: 24
   - name: home_valid1
     file: /dataset/3dvideo/THE_HOBBIT__THE_DESOLATION_OF_SMAUG_PART_1.Title100_1.left.mkv
     ss:
       - 00:12:00
     w: 1920
     h: 800
+    duration: 02:00:00
+    framerate: 24
   - name: home_valid2
     file: /dataset/3dvideo/wedding.mkv
     ss:
@@ -154,6 +186,8 @@ movies:
       - 00:01:20
     w: 1920
     h: 1080
+    duration: 00h01m44s
+    framerate: 24
   - name: home_pic
     file: /dataset/uban100/test/SRF_2/target/BSD100_%03d.png
     ss:

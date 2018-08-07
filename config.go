@@ -19,6 +19,7 @@ type MovieFileConfig struct {
 	Type string   `yaml:"type"`
 	Count int 	`yaml:"count"`
 	FrameRate int	`yaml:"framerate"`
+	Duration string	`yaml:"duration"`
 }
 
 type MoviesConfig struct {

@@ -71,6 +71,14 @@ movies:
       - 01:20:00
     w: 3840
     h: 2160
+  - name: hq_movieface
+    file: /media/dt5/movie_face.yuv
+    ss:
+      - 00:00:00
+    w: 2048
+    h: 858
+    type: yuv
+    framerate: 24
   - name: 4k_face01
     file: /media/dt5.hdd2/face/crop_01/img_%08d.png
     ss:

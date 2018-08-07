@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"math/rand"
 	"time"
+	"fmt"
 )
 
 type MovieFileConfig struct {
@@ -17,6 +18,7 @@ type MovieFileConfig struct {
 	Height int  `yaml:"h"`
 	Type string   `yaml:"type"`
 	Count int 	`yaml:"count"`
+	FrameRate int	`yaml:"framerate"`
 }
 
 type MoviesConfig struct {
@@ -98,3 +100,14 @@ func (conf *MoviesConfig) FindMatchedConfigs(name string) []*MovieFileConfig {
 //
 //	log.Println("Can I access Config ? ", Config)
 //}
+
+func fmtDuration(d time.Duration) string {
+	d = d.Round(time.Second)
+	h := d / time.Hour
+	d -= h * time.Hour
+	m := d / time.Minute
+	d -= m * time.Minute
+	s := d / time.Second
+
+	return fmt.Sprintf("%02d:%02d:%02d", h, m, s)
+}

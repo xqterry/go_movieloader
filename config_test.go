@@ -100,3 +100,17 @@ func TestMatch(t *testing.T) {
 		t.Log("----- ")
 	}
 }
+
+
+func TestTimeDuration(t *testing.T) {
+	tm := 5 * time.Second * 1000
+	st := fmtDuration(tm)
+	t.Log(st)
+
+	tm, err := time.ParseDuration(tm.String())
+	if err != nil {
+		t.Log(err)
+	}
+	t.Log(int(tm.Seconds()))
+
+}

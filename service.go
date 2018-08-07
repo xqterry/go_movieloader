@@ -494,7 +494,7 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 				frameHeight = item.cmd.CropH
 			}
 
-			if (item.cmd.Scale && fileConf.Width > 1920) || need_scale {
+			if (item.cmd.Scale && fileConf.Height > 1080) || need_scale {
 				vf = fmt.Sprintf("scale=%d:%d", item.cmd.Width, item.cmd.Height)
 				frameWidth = item.cmd.Width
 				frameHeight = item.cmd.Height
@@ -514,6 +514,23 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 					args = append(args, ssn)
 				}
 			}
+
+			if fileConf.Type == "yuv" {
+				args = append(args, "-pixel_format")
+				args = append(args, "yuv422p")
+
+				args = append(args, "-video_size")
+				args = append(args, fmt.Sprintf("%dx%d", fileConf.Width, fileConf.Height))
+
+				args = append(args, "-framerate")
+				args = append(args, fmt.Sprintf("%d", fileConf.FrameRate))
+			}
+
+			args = append(args, "-f")
+			args = append(args, "rawvideo")
+
+
+
 			args = append(args, "-i")
 			args = append(args, fn)
 			args = append(args, "-f")
@@ -531,8 +548,6 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 			args = append(args, "rawvideo")
 			args = append(args, "-pix_fmt")
 			args = append(args, "rgb24")
-			args = append(args, "-f")
-			args = append(args, "rawvideo")
 			args = append(args, "pipe:1")
 
 			iargs := make([]interface{}, len(args))

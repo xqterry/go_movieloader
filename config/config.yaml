@@ -174,7 +174,7 @@ movies:
       - 00:12:00
     w: 1920
     h: 800
-    duration: 02:00:00
+    duration: 1h15m10s
     framerate: 24
   - name: home_valid2
     file: /dataset/3dvideo/wedding.mkv

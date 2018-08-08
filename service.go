@@ -467,6 +467,25 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 			frameCount := fmt.Sprintf("%d", nFrameCount)
 			//ss := fileConf.Skip
 			ss := fileConf.Skip[rand.Intn(len(fileConf.Skip))]
+
+			if fileConf.Type != "images" {
+				tm, err := time.ParseDuration(fileConf.Duration)
+				if err == nil {
+					total := int(tm.Seconds())
+					log.Println("TM Duration: ", tm, " in seconds ", total )
+					tpos := rand.Intn(total - 60)
+
+					log.Println("tpos ", tpos, " rand from ", total)
+
+					tm = time.Second * time.Duration(tpos)
+					ss = fmtDuration(tm)
+				} else {
+					log.Println("parse duration error ", err)
+				}
+			} else {
+				log.Println("FileConf type ", fileConf.Type)
+			}
+
 			fn := fileConf.Filename
 
 			frameWidth := item.cmd.Width
@@ -524,11 +543,10 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 
 				args = append(args, "-framerate")
 				args = append(args, fmt.Sprintf("%d", fileConf.FrameRate))
+
+				args = append(args, "-f")
+				args = append(args, "rawvideo")
 			}
-
-			args = append(args, "-f")
-			args = append(args, "rawvideo")
-
 
 
 			args = append(args, "-i")

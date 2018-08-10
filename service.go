@@ -518,7 +518,10 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 				frameWidth = item.cmd.Width
 				frameHeight = item.cmd.Height
 			}
-			vf = fmt.Sprintf("%s,select='eq(pict_type\\, I)'", vf)
+
+			if item.cmd.UseIFrame {
+				vf = fmt.Sprintf("%s,select='eq(pict_type\\, I)'", vf)
+			}
 
 			args := make([]string, 0)
 
@@ -556,6 +559,11 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 
 			args = append(args, "-vf")
 			args = append(args, vf)
+
+			if item.cmd.UseIFrame {
+				args = append(args, "-vsync")
+				args = append(args, "0")
+			}
 
 			if nFrameCount > 0 {
 				args = append(args, "-frames")

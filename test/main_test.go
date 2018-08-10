@@ -35,24 +35,46 @@ func RandomCrop(src []byte, dst []byte, h int, w int, ch int, cw int, s int, r *
 			dst[di] = src[si]
 			dst[di + 1] = src[si + 1]
 			dst[di + 2] = src[si + 2]
+
+			//log.Println(di)
 		}
 	}
 
 	return ah, aw
 }
 
+func TestCrop (t *testing.T)  {
+	i := 0
+	w := 1920
+	h := 800
+	cw := 468
+	ch := 468
+	r := rand.New(rand.NewSource(1478))
+
+
+	bw := w - cw
+	bh := h - ch
+	for ;i < 10000;i++ {
+		aw := r.Intn(bw)
+		ah := r.Intn(bh)
+
+		if aw + cw >= w || ah + ch >= h {
+			t.Log("wrong index")
+		}
+	}
+}
 
 func TestRGB(t *testing.T) {
 	r := rand.New(rand.NewSource(1478))
 	//k := r.Intn(1)
 
 	f, _ := os.Open("a.rgb")
-	w := 896
-	h := 448
+	w := 1920
+	h := 800
 	s := 3
 
 	cw := 448
-	ch := 224
+	ch := 448
 
 	//bw := w - cw
 	//bh := h - ch
@@ -64,7 +86,7 @@ func TestRGB(t *testing.T) {
 	t.Log("Full size SRC", w * s * h, len(buf), " read ", n)
 
 	ob := make([]byte, cw * ch * s, cw * ch * s)
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 1000; i++ {
 		//aw := r.Intn(bw)
 		//ah := r.Intn(bh)
 		//
@@ -91,9 +113,9 @@ func TestRGB(t *testing.T) {
 		ah, aw := RandomCrop(buf, ob, h, w, ch, cw, s, r)
 
 		ob = ob[:cw * ch * s]
-		o1, _ := os.Create(fmt.Sprintf("%d_%d.rgb", ah, aw))
-		o1.Write(ob[:cw * ch * s])
-		defer o1.Close()
+		//o1, _ := os.Create(fmt.Sprintf("%d_%d.rgb", ah, aw))
+		//o1.Write(ob[:cw * ch * s])
+		//defer o1.Close()
 
 		m := image.NewRGBA(image.Rect(0, 0, cw, ch))
 		for y := 0; y < ch; y++ {

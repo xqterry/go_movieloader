@@ -123,6 +123,38 @@ movies:
     h: 1024
     type: images
     count: 4568
+  - name: xiyou_pic1
+    file: /media/dt8/XI/DAR/DAR_%08d.tif
+    ss:
+      - 00:00:00
+    w: 2048
+    h: 858
+    type: images
+    count: 39898
+  - name: xiyou_pic2
+    file: /media/dt8/XI/JXZ/TEST/JXZ%08d.tif
+    ss:
+      - 00:00:00
+    w: 2048
+    h: 858
+    type: images
+    count: 20386
+  - name: xiyou_pic3
+    file: /media/dt8/XI/WWXD/TEST/WWXD%08d.tif
+    ss:
+      - 00:00:00
+    w: 2048
+    h: 858
+    type: images
+    count: 34880
+  - name: xiyou_pic4
+    file: /media/dt8/XI/YLL/YLL_%08d.tif
+    ss:
+      - 00:00:00
+    w: 2048
+    h: 858
+    type: images
+    count: 42867
   - name: anim1
     file: /home/dt8/movies/animation/miyazaki/from.up.on.poppy.hill.2011.1080p.bluray.x264-nodlabs.mkv
     ss:

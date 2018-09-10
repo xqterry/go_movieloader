@@ -264,14 +264,14 @@ func (svc *ZMQService) server_worker(wid int) {
 	}
 }
 
-func (svc *ZMQService) RandomCrop(src []byte, dst []byte, h int, w int, ch int, cw int, s int) {
+func (svc *ZMQService) RandomPos(h int, w int, ch int, cw int) (aw int, ah int) {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	bw := w - cw
 	bh := h - ch
 
-	aw := r.Intn(bw)
-	ah := r.Intn(bh)
+	aw = r.Intn(bw)
+	ah = r.Intn(bh)
 	ah += ah % 2
 
 	// keep H % 2 == 0
@@ -279,6 +279,10 @@ func (svc *ZMQService) RandomCrop(src []byte, dst []byte, h int, w int, ch int, 
 		ah = bh - 2
 	}
 
+	return aw, ah
+}
+
+func (svc *ZMQService) RandomCrop(src []byte, dst []byte, h int, w int, ch int, cw int, ah int, aw int, s int) {
 	for y := ah; y < ah + ch; y++ {
 		for x := aw; x < aw + cw; x++ {
 			di := (y - ah) * cw * s + (x - aw) * s
@@ -293,7 +297,7 @@ func (svc *ZMQService) RandomCrop(src []byte, dst []byte, h int, w int, ch int, 
 	//return ah, aw
 }
 
-func (svc *ZMQService) _exec_cmd(cmd *exec.Cmd, item *WorkItem, frameWidth int, frameHeight int) (frameCount int) {
+func (svc *ZMQService) _exec_cmd(cmd *exec.Cmd, item *WorkItem, frameWidth int, frameHeight int, frameGroup int) (frameCount int) {
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		log.Printf("get pipe failed \n")
@@ -326,6 +330,11 @@ func (svc *ZMQService) _exec_cmd(cmd *exec.Cmd, item *WorkItem, frameWidth int, 
 
 
 	framePos := 0
+	ah := 0
+	aw := 0
+
+	aw, ah = svc.RandomPos(frameHeight, frameWidth, item.cmd.CropH, item.cmd.CropW)
+
 	for {
 		//log.Println("blocking for read")
 		//n, err := r.Read(buf[:cap(buf)])
@@ -357,7 +366,10 @@ func (svc *ZMQService) _exec_cmd(cmd *exec.Cmd, item *WorkItem, frameWidth int, 
 
 		if item.cmd.CenterCrop == false {
 			// Random Crop
-			svc.RandomCrop(frameBuf, buf, frameHeight, frameWidth, item.cmd.CropH, item.cmd.CropW, 3)
+			if nChunks % frameGroup == 0 {
+				aw, ah = svc.RandomPos(frameHeight, frameWidth, item.cmd.CropH, item.cmd.CropW)
+			}
+			svc.RandomCrop(frameBuf, buf, frameHeight, frameWidth, item.cmd.CropH, item.cmd.CropW, ah, aw,3)
 		} else {
 			copy(buf[:frameSize], frameBuf)
 		}
@@ -587,7 +599,7 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 			//cmd.Stderr = os.Stderr
 			//cmd.Run()
 
-			nFrames := svc._exec_cmd(cmd, item, frameWidth, frameHeight)
+			nFrames := svc._exec_cmd(cmd, item, frameWidth, frameHeight, item.cmd.group)
 			log.Println(fileConf.Name, nFrames)
 
 			actualFrames += nFrames

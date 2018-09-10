@@ -10,10 +10,10 @@ type SendCommand struct {
 	Movie string		`yaml:"movie"`
 	CropW int		`yaml:"cropw"`
 	CropH int		`yaml:"croph"`
+	Group int		`yaml:"group"`
 	Scale bool		`yaml:"scale"`
-	CenterCrop bool 	`yaml:"centercrop"`
+	CenterCrop bool		`yaml:"centercrop"`
 	UseIFrame bool		`yaml:"iframe"`
-	group int		`yaml:"group"`
 }
 
 type RecvCommand struct {

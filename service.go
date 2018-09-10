@@ -254,6 +254,7 @@ func (svc *ZMQService) server_worker(wid int) {
 			log.Println("recv cmd error", err)
 		}
 
+		log.Println(content[0])
 		item := &WorkItem{
 			cid: identity[0],
 			cmd: cmd,
@@ -264,20 +265,26 @@ func (svc *ZMQService) server_worker(wid int) {
 	}
 }
 
-func (svc *ZMQService) RandomPos(h int, w int, ch int, cw int) (aw int, ah int) {
+func RandomPos(h int, w int, ch int, cw int) (int, int) {
+	log.Println("enter random pos")
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	//log.Println("check #0")
 
 	bw := w - cw
 	bh := h - ch
 
-	aw = r.Intn(bw)
-	ah = r.Intn(bh)
+	//log.Println("check #1", w, cw, bw)
+	aw := r.Intn(bw)
+	//log.Println("check #2", h, ch, bh)
+	ah := r.Intn(bh)
+	//log.Println("check #3")
 	ah += ah % 2
 
 	// keep H % 2 == 0
 	if ah == bh {
 		ah = bh - 2
 	}
+	log.Println("exit with ", ah, aw)
 
 	return aw, ah
 }
@@ -333,10 +340,13 @@ func (svc *ZMQService) _exec_cmd(cmd *exec.Cmd, item *WorkItem, frameWidth int, 
 	ah := 0
 	aw := 0
 
-	aw, ah = svc.RandomPos(frameHeight, frameWidth, item.cmd.CropH, item.cmd.CropW)
+	if item.cmd.CenterCrop == false {
+		aw, ah = RandomPos(frameHeight, frameWidth, item.cmd.CropH, item.cmd.CropW)
+		log.Println("first random crop", aw, ah)
+	}
 
 	for {
-		//log.Println("blocking for read")
+		log.Println("blocking for read")
 		//n, err := r.Read(buf[:cap(buf)])
 		//log.Println("-> reading # ", item.workerId)
 
@@ -355,7 +365,7 @@ func (svc *ZMQService) _exec_cmd(cmd *exec.Cmd, item *WorkItem, frameWidth int, 
 		}
 		framePos += n
 		if framePos < frameSize {
-			//log.Println(item.workerId, "Read ", framePos, " need ", frameSize)
+			log.Println(item.workerId, "Read ", framePos, " need ", frameSize)
 			continue
 		} else {
 			//log.Println("frame", nChunks, " complete")
@@ -367,7 +377,7 @@ func (svc *ZMQService) _exec_cmd(cmd *exec.Cmd, item *WorkItem, frameWidth int, 
 		if item.cmd.CenterCrop == false {
 			// Random Crop
 			if nChunks % frameGroup == 0 {
-				aw, ah = svc.RandomPos(frameHeight, frameWidth, item.cmd.CropH, item.cmd.CropW)
+				aw, ah = RandomPos(frameHeight, frameWidth, item.cmd.CropH, item.cmd.CropW)
 			}
 			svc.RandomCrop(frameBuf, buf, frameHeight, frameWidth, item.cmd.CropH, item.cmd.CropW, ah, aw,3)
 		} else {
@@ -405,7 +415,7 @@ func (svc *ZMQService) _exec_cmd(cmd *exec.Cmd, item *WorkItem, frameWidth int, 
 }
 
 func (svc *ZMQService) process_cmd(item *WorkItem) {
-	log.Println("get item from ", item.workerId, "data:", hex.Dump([]byte(item.cid)), item.cmd.Index, item.cmd )
+	log.Println("get item from ", item.workerId, "data:", hex.Dump([]byte(item.cid)), item.cmd.Index, item.cmd, item.cmd.Group )
 
 	var conf_array []*MovieFileConfig
 	wild := false
@@ -599,8 +609,8 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 			//cmd.Stderr = os.Stderr
 			//cmd.Run()
 
-			nFrames := svc._exec_cmd(cmd, item, frameWidth, frameHeight, item.cmd.group)
-			log.Println(fileConf.Name, nFrames)
+			nFrames := svc._exec_cmd(cmd, item, frameWidth, frameHeight, item.cmd.Group)
+			log.Println("Check ", fileConf.Name, nFrames, item.cmd.Group)
 
 			actualFrames += nFrames
 

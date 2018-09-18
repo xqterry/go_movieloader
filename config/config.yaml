@@ -61,8 +61,8 @@ movies:
     h: 1080
     duration: 01h40m00s
     framerate: 24
-  - name: 4k_lala
-    file: /media/dt8/My Passport/4K/La.La.Land.2016.2160p.BluRay.HEVC.TrueHD.7.1.Atmos-TERMiNAL/BDMV/STREAM/00000.m2ts
+  - name: 4k_movie_lala
+    file: /media/dt7/data02/4K/La.La.Land.2016.2160p.BluRay.HEVC.TrueHD.7.1.Atmos-TERMiNAL/BDMV/STREAM/00000.m2ts
     ss:
       - 00:30:00
       - 01:00:00
@@ -71,8 +71,8 @@ movies:
     h: 2160
     duration: 02h07m00s
     framerate: 24
-  - name: 4k_arr
-    file: /media/dt8/My Passport/4K/Arrival.2016.2160p.BluRay.HEVC.DTS-HD.MA.7.1-TERMiNAL/BDMV/STREAM/00001.m2ts
+  - name: 4k_movie_arr
+    file: /media/dt7/data02/4K/Arrival.2016.2160p.BluRay.HEVC.DTS-HD.MA.7.1-TERMiNAL/BDMV/STREAM/00001.m2ts
     ss:
       - 00:20:00
       - 00:50:00
@@ -81,8 +81,8 @@ movies:
     h: 2160
     duration: 01h55m00s
     framerate: 24
-  - name: 4k_Fan
-    file: /media/dt8/My Passport/4K/Fantastic.Beasts.and.Where.to.Find.Them.2016.2160p.BluRay.HEVC.TrueHD.7.1.Atmos-SUPERSIZE/BDMV/STREAM/00001.m2ts
+  - name: 4k_movie_Fan
+    file: /media/dt7/data02/4K/Fantastic.Beasts.and.Where.to.Find.Them.2016.2160p.BluRay.HEVC.TrueHD.7.1.Atmos-SUPERSIZE/BDMV/STREAM/00001.m2ts
     ss:
       - 00:20:00
       - 00:50:00
@@ -124,37 +124,45 @@ movies:
     type: images
     count: 4568
   - name: xiyou_pic1
-    file: /media/dt8/XI/DAR/DAR_%08d.tif
+    file: /media/dt7/data01/movie_face_tif/DAR/DAR_%08d.tif
     ss:
       - 00:00:00
     w: 2048
     h: 858
     type: images
     count: 39898
-  - name: xiyou_pic2
-    file: /media/dt8/XI/JXZ/TEST/JXZ%08d.tif
+  - name: 4k_pic2
+    file: /media/dt7/data01/movie_face_tif/JXZ/TEST/JXZ%08d.tif
     ss:
       - 00:00:00
     w: 2048
     h: 858
     type: images
     count: 20386
-  - name: xiyou_pic3
-    file: /media/dt8/XI/WWXD/TEST/WWXD%08d.tif
+  - name: 4k_pic3
+    file: /media/dt7/data01/movie_face_tif/WWXD/TEST/WWXD%08d.tif
     ss:
       - 00:00:00
     w: 2048
     h: 858
     type: images
     count: 34880
-  - name: xiyou_pic4
-    file: /media/dt8/XI/YLL/YLL_%08d.tif
+  - name: 4k_pic4
+    file: /media/dt7/data01/movie_face_tif/YLL/YLL_%08d.tif
     ss:
       - 00:00:00
     w: 2048
     h: 858
     type: images
     count: 42867
+  - name: unused_4k_pic5_seq_not_start_from_0
+    file: /media/dt7/data01/movie_face_tif/XXDTQ/XXDTQ_%08d.tif
+    ss:
+      - 00:00:00
+    w: 2048
+    h: 858
+    type: images
+    count: 24678
   - name: anim1
     file: /home/dt8/movies/animation/miyazaki/from.up.on.poppy.hill.2011.1080p.bluray.x264-nodlabs.mkv
     ss:

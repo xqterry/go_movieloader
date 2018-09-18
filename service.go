@@ -304,11 +304,12 @@ func (svc *ZMQService) RandomCrop(src []byte, dst []byte, h int, w int, ch int, 
 	//return ah, aw
 }
 
-func (svc *ZMQService) _exec_cmd(cmd *exec.Cmd, item *WorkItem, frameWidth int, frameHeight int, frameGroup int) (frameCount int) {
+func (svc *ZMQService) _exec_cmd(cmd *exec.Cmd, item *WorkItem, frameWidth int, frameHeight int, frameGroup int, skipped int) (frameCount int) {
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		log.Printf("get pipe failed \n")
 	}
+	log.Println("_exec ffmpeg skipped first ", skipped)
 
 	//stderrIn, err := cmd.StderrPipe()
 	//if err != nil {
@@ -343,10 +344,13 @@ func (svc *ZMQService) _exec_cmd(cmd *exec.Cmd, item *WorkItem, frameWidth int, 
 	if item.cmd.CenterCrop == false {
 		aw, ah = RandomPos(frameHeight, frameWidth, item.cmd.CropH, item.cmd.CropW)
 		log.Println("first random crop", aw, ah)
+	} else {
+		ah = (frameHeight - item.cmd.CropH) / 2
+		aw = (frameWidth - item.cmd.CropW) / 2
 	}
 
 	for {
-		log.Println("blocking for read")
+		//log.Println("blocking for read")
 		//n, err := r.Read(buf[:cap(buf)])
 		//log.Println("-> reading # ", item.workerId)
 
@@ -365,13 +369,23 @@ func (svc *ZMQService) _exec_cmd(cmd *exec.Cmd, item *WorkItem, frameWidth int, 
 		}
 		framePos += n
 		if framePos < frameSize {
-			log.Println(item.workerId, "Read ", framePos, " need ", frameSize)
+			//log.Println(item.workerId, "Read ", framePos, " need ", frameSize)
 			continue
 		} else {
 			//log.Println("frame", nChunks, " complete")
 		}
 
+		if skipped > 0 {
+			skipped--
+			framePos = 0
+			continue
+		}
+
+
 		nChunks++
+		if nChunks % 10 == 0 {
+			//log.Println("got frames", nChunks)
+		}
 		framePos = 0
 
 		if item.cmd.CenterCrop == false {
@@ -381,7 +395,13 @@ func (svc *ZMQService) _exec_cmd(cmd *exec.Cmd, item *WorkItem, frameWidth int, 
 			}
 			svc.RandomCrop(frameBuf, buf, frameHeight, frameWidth, item.cmd.CropH, item.cmd.CropW, ah, aw,3)
 		} else {
-			copy(buf[:frameSize], frameBuf)
+			//log.Println("copy start")
+			if frameSize > outFrameSize {
+				svc.RandomCrop(frameBuf, buf, frameHeight, frameWidth, item.cmd.CropH, item.cmd.CropW, ah, aw, 3)
+			} else {
+				copy(buf[:frameSize], frameBuf)
+			}
+			//log.Println("copy end")
 		}
 
 		//log.Println(item.workerId, "got frame", nChunks, " crop size", " len ", len(buf))
@@ -478,6 +498,7 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 	actualFrames := 0
 	totalFrames := item.cmd.Count
 	runOnce := true
+	skippedFrames := 24
 
 	for runOnce || actualFrames < totalFrames {
 		runOnce = false
@@ -486,7 +507,6 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 			if totalFrames - actualFrames < nFrameCount {
 				nFrameCount = totalFrames - actualFrames
 			}
-			frameCount := fmt.Sprintf("%d", nFrameCount)
 			//ss := fileConf.Skip
 			ss := fileConf.Skip[rand.Intn(len(fileConf.Skip))]
 
@@ -504,9 +524,13 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 				} else {
 					log.Println("parse duration error ", err)
 				}
+				skippedFrames = 24
 			} else {
 				log.Println("FileConf type ", fileConf.Type)
+				skippedFrames = 0
 			}
+
+			frameCount := fmt.Sprintf("%d", nFrameCount + skippedFrames)
 
 			fn := fileConf.Filename
 
@@ -609,7 +633,7 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 			//cmd.Stderr = os.Stderr
 			//cmd.Run()
 
-			nFrames := svc._exec_cmd(cmd, item, frameWidth, frameHeight, item.cmd.Group)
+			nFrames := svc._exec_cmd(cmd, item, frameWidth, frameHeight, item.cmd.Group, skippedFrames)
 			log.Println("Check ", fileConf.Name, nFrames, item.cmd.Group)
 
 			actualFrames += nFrames

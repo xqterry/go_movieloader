@@ -553,16 +553,29 @@ func (svc *ZMQService) process_cmd(item *WorkItem) {
 			vf := fmt.Sprintf("crop=%d:%d", frameWidth, frameHeight)
 
 			need_scale := false
+			scale_to_h := 0
+			scale_to_w := 0
+			if (item.cmd.Scale && fileConf.Height > 1080) {
+				need_scale = true
+				scale_to_h = int(fileConf.Height / 2)
+				scale_to_w = int(fileConf.Width / 2)
+				frameWidth = scale_to_w
+				frameHeight = scale_to_h
+			}
+
 			if item.cmd.CropW > frameWidth || item.cmd.CropH > frameHeight {
 				need_scale = true
 				frameWidth = item.cmd.CropW
 				frameHeight = item.cmd.CropH
+				scale_to_h = frameHeight
+				scale_to_w = frameWidth
 			}
 
-			if (item.cmd.Scale && fileConf.Height > 1080) || need_scale {
-				vf = fmt.Sprintf("scale=%d:%d", item.cmd.Width, item.cmd.Height)
-				frameWidth = item.cmd.Width
-				frameHeight = item.cmd.Height
+			if need_scale {
+				//vf = fmt.Sprintf("scale=%d:%d", item.cmd.Width, item.cmd.Height)
+				vf = fmt.Sprintf("scale=%d:%d", frameWidth, frameHeight)
+				//frameWidth = item.cmd.Width
+				//frameHeight = item.cmd.Height
 			}
 
 			if item.cmd.UseIFrame {

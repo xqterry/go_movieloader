@@ -266,7 +266,7 @@ func (svc *ZMQService) server_worker(wid int) {
 }
 
 func RandomPos(h int, w int, ch int, cw int) (int, int) {
-	log.Println("enter random pos")
+	//log.Println("enter random pos")
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	//log.Println("check #0")
 
@@ -284,7 +284,7 @@ func RandomPos(h int, w int, ch int, cw int) (int, int) {
 	if ah == bh {
 		ah = bh - 2
 	}
-	log.Println("exit with ", ah, aw)
+	//log.Println("exit with ", ah, aw)
 
 	return aw, ah
 }
